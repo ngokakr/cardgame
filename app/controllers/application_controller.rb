@@ -53,29 +53,95 @@ class ApplicationController < ActionController::Base
     end
   end
   
+  # coinやdiaの数を増減する
+  # 0未満になる時、エラー
+  def changepoint(kind,point)
+    if kind == "coin"
+      current_user.coin+= point;
+      if current_user.coin < 0
+        current_user.coin-= point
+        return false
+      else
+        current_user.save!
+        return true
+      end
+    elsif kind == "dia"
+      current_user.dia += point;
+      if current_user.dia < 0
+        current_user.dia -= point;
+        return false
+      else
+        current_user.save!
+        return true
+      end
+    else
+      return false
+    end
+  end
+  
+  # ボックスにカードを追加する
+  def addboxcards(cids,count)
+    cids.each{|num|
+      @card = current_user.cards.find_or_create_by(cid: num)
+      @card.count += count;
+      @card.lv = 1
+      @card.save!
+    }
+  end
+  
   def createTest
     pdata = PlayerData.new(123456789,100,101,1200,3)
     render :json => pdata.to_json
   end
   
-  def makejson(code,kind,data)
+  # def makejson(code,kind,data)
+    
+  #   hash = {}
+  #   kind.each_with_index do |var,i|
+  #     hash[var] = data[i]
+  #   end
+    
+  #   # require 'msgpack'
+    
+  #   msg = {}
+  #   msg["meta"] = code
+  #   msg["data"] = hash
+  #   return {"meta": {"code": code}, "data": hash.to_json}
+  #   # render :text => MessagePack.pack(msg)
+  # end
+  
+  def makejson(code,type,kind,data)
     
     hash = {}
     kind.each_with_index do |var,i|
       hash[var] = data[i]
     end
     
-    # require 'msgpack'
+    return {"meta": {"code": code,"type": type}, "data": hash.to_json}
     
-    msg = {}
-    msg["meta"] = code
-    msg["data"] = hash
-    render :json => {"meta": {"code": code}, "data": hash.to_json}
-    # render :text => MessagePack.pack(msg)
   end
   
-  def loginjson ()
-    makejson("200",["type","name","uid","coin","dia","loginDays","rate"],["login",@user.name,@user.uid,@user.coin,@user.dia,@user.loginDays,@user.rate])
+  # プレイヤーデータをjsonにする
+  def playerjson
+    return makejson("200","player",["name","uid","coin","dia","loginDays","rate"],[@user.name,@user.uid,@user.coin,@user.dia,@user.loginDays,@user.rate])
+  end
+  
+  # カードデータをjsonにする
+  def cardsjson
+    # カード情報 [[card_id,lv,count],[card_id,lv,count],[card_id,lv,count]]
+    carddatas = []
+    cds = current_user.cards
+    cds.each{|card|
+      carddatas.push([card.cid,card.lv,card.count])
+    }
+    return makejson("200","cards",["cd"],[carddatas])
+  end
+  
+  def loginjson
+    p makejson("200","login",["pjson","cjson"],[playerjson,cardsjson])
+    
+    return makejson("200","login",["pjson","cjson"],[playerjson,cardsjson])
+    
   end
   
   private

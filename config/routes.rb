@@ -1,9 +1,18 @@
 Rails.application.routes.draw do
   root to: "users#new"
   
-  get "login", to: "sessions#new"
+  # 登録
+  resources :users,only: [:show,:create]
+  
+  # ログイン用
   post "login", to: "sessions#create"
   
-  resources :users,only: [:show,:create]
+  # カード購入 (kind=購入通貨 count=購入数)
+  post "shop",to:"shops#getcard"
+  
+  # テスト用
+  post "test",to: "users#test"
+  
+  
   
 end

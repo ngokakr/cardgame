@@ -1,0 +1,2 @@
+class Carddata < ApplicationRecord
+end

@@ -1,9 +1,27 @@
 module ApplicationHelper
   include SessionsHelper
   
+  class Deckdata
+    attr_accessor :name, :data
+    def initialize(name,data)
+      self.name = name
+      self.data = data
+    end
+  end
+  
+  class CardindeckData
+    attr_accessor :d_id, :c_id,:count
+    def initialize(d_id,c_id,count)
+      self.d_id = d_id
+      self.c_id = c_id
+    end
+  end
+  
+  MAX_CARD_IN_DECK = 30
+  
   # 初期化処理
   def startdata
-    ActiveRecord::Base.transaction do
+    # ActiveRecord::Base.transaction do
       # カード追加
       [1, 2, 3, 4, 5,6,7,8,9,10,11,12].each do |number|
         addboxcard(number,1)
@@ -17,16 +35,10 @@ module ApplicationHelper
         setdeckcard(deck_id,number,3)
       end
       
-    end
+    # end
   end
   
-  # ボックスにカードを追加する
-  def addboxcard(cid,count)
-    @card = current_user.cards.find_or_create_by(cid: cid)
-    @card.count += count;
-    @card.lv = 1
-    @card.save!
-  end
+  
   
   # デッキにカードをセットする
   def setdeckcard (deck_id,cid,count)
@@ -36,11 +48,11 @@ module ApplicationHelper
     end
     
     # デッキとカードの関係を取得する
-    c =  u.cards.find_by(cid: cid);
+    c =  current_user.cards.find_by(cid: cid);
     unless c #カードを所有していなければリターン
       return
     end
-    cd =  u.cards.find_by(cid: cid).cardindecks.find_or_create_by(deck_id: deck_id) 
+    cd =  current_user.cards.find_by(cid: cid).cardindecks.find_or_create_by(deck_id: deck_id) 
     
     # 0枚以下であれば削除
     if count <= 0
@@ -55,16 +67,7 @@ module ApplicationHelper
     cd.save!
   end
   
-  # coinやdiaの数を増減する
-  def changepoint(kind,point)
-    if kind == "coin"
-      current_user.coin+= point;
-    end
-    
-    if kind == "dia"
-      current_user.dia += point;
-    end
-  end
+  
   
   # カード購入
   # def shop(pack,kind,count) #pack=購入パック kind=購入通貨 count=購入数
@@ -114,6 +117,26 @@ module ApplicationHelper
   # デッキ削除関数
   def deletedeck (deck_id)
     current_user.decks.find(deck_id).destroy
+  end
+  
+  # 正しいデッキかどうか
+  def correct_deck?(deck_id)
+    d = current_user.decks.find(deck_id)
+    
+    # 30枚かどうか
+    count = d.cardindecks.sum(:count)
+    unless count == MAX_CARD_IN_DECK
+      return false
+    end
+    
+    # 3枚以上入れているカードが1種類でもあるか
+    if 1 <= d.cardindecks.where("count > 3").count
+      return false
+    end
+    
+    # 正しいデッキである。
+    return true
+    
   end
   
 end

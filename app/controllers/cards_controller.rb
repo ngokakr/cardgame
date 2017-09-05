@@ -4,12 +4,8 @@ class CardsController < ApplicationController
   
   
   # ショップ等
-  
   def create
-    
     @card = current_user.cards.build(card_params)
-    
-    
   end
   
   # shop = ショップ番号 , use = coin/dia/ticket , count = 購入数
@@ -25,5 +21,7 @@ class CardsController < ApplicationController
       redirect_to root_url
     end
   end
+  
+  
   
 end
