@@ -3,6 +3,9 @@ class ApplicationController < ActionController::Base
   include ApplicationHelper
   include SessionsHelper
   
+  NeedCards = [ 2, 4, 10, 20, 50, 100 ];
+  MaxLvs = [7,6,5,4];
+  
   class PlayerData
     attr_accessor :uid, :coin, :dia,:rate,:loginDays
     def initialize(uid,coin,dia,rate,loginDays)
@@ -137,6 +140,20 @@ class ApplicationController < ActionController::Base
     return makejson("200","cards",["cd"],[carddatas])
   end
   
+  def lvupjson (cid,to_lv)
+    makejson("200","lvup",["cid","lv"],[cid,to_lv])
+  end
+  
+  # 加えられたカードをjsonにする
+  def addcardsjson(card_ids)
+    makejson("200","addcards",["ids"],[card_ids])
+  end
+  
+  # エラーjson
+  def errorjson(kind)
+    makejson("500",kind,[],[]);
+  end
+  
   def loginjson
     p makejson("200","login",["pjson","cjson"],[playerjson,cardsjson])
     
@@ -148,7 +165,7 @@ class ApplicationController < ActionController::Base
   
   def require_user_logged_in
     unless logged_in?
-      redirect_to login_url
+      errorjson("login");
     end
   end
   

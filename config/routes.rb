@@ -10,9 +10,10 @@ Rails.application.routes.draw do
   # カード購入 (kind=購入通貨 count=購入数)
   post "shop",to:"shops#getcard"
   
+  # レベルアップ用
+  post "lvup",to: "cards#lvup"
+  
   # テスト用
   post "test",to: "users#test"
-  
-  
   
 end

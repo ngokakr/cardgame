@@ -23,7 +23,7 @@ class UsersController < ApplicationController
     session[:user_id] = @user.id
     
     # カード追加
-    addboxcards([0,1, 2, 3, 4, 5,6,7,8,9,10,11,12],1)
+    addboxcards([8,14,58,21,66,6,80,77,79,78,185],1)
     
     # ログイン結果を送信
     render :json => loginjson()

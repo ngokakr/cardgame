@@ -5,9 +5,9 @@ class SessionsController < ApplicationController
     if login(uid, password)
       # makejson("200",["login","loginDays"],["",@user.loginDays.to_s])
       
-      loginjson()
+      render :json => loginjson()
     else
-      makejson("500",["login","uid"],["","381"])
+      render :json => errorjson("login")
     end
   end
 

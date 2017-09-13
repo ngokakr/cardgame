@@ -83,18 +83,7 @@ module ApplicationHelper
   #   end
   # end
   
-  # カードレベルアップ
-  def lvup(cid,to_lv)
-    # 存在するか -> 指定したレベルかチェック
-    @card = current_user.cards.find_by(cid: cid)
-    if @card
-      if @card.lv+1 == to_lv
-        @card.lv += 1
-      end
-    else
-      return
-    end 
-  end
+  
   
   # デッキ名変更
   def changedeckname (deck_id,name)

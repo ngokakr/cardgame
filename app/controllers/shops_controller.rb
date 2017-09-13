@@ -1,5 +1,5 @@
 class ShopsController < ApplicationController
-  
+  before_action :require_user_logged_in, only: [:getcard]
   def shop_params
     params.require(:shop).permit(:content)
   end
@@ -17,6 +17,7 @@ class ShopsController < ApplicationController
     
     # ポイントを増減し、falseだったら中止
     unless changepoint(kind,usepoint)
+      render :json => errorjson("getcard")
       return
     end
     
@@ -28,11 +29,11 @@ class ShopsController < ApplicationController
     
     # id決定
     result = []
-    rate3 = 20
+    rate3 = 10
     rate2 = 60
     rate1 = 300
     
-    count*cardsinpack.times do
+    (count*cardsinpack).times do
       r = rand(1000) 
       # レア度3
       if r < rate3
@@ -61,10 +62,18 @@ class ShopsController < ApplicationController
     p result
     
     # カード追加
-    addboxcards(result,1)
+    if addboxcards(result,1)
+      # 正常に完了
+      render :json => addcardsjson(result)
+      return
+    else
+      # エラー
+      render :json => errorjson("getcard")
+      return
+    end
     
     
-    render :json => loginjson()
+    
     # # トランザクション
     # ActiveRecord::Base.transaction do
     #   @card.save!
